@@ -3,58 +3,46 @@ from datetime import datetime
 from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
-    __tablename__='users'
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(100), index = True, unique = True, nullable = False)
-    emailid = db.Column(db.String(100), index = True, nullable = False)
-    password_hash = db.Column(db.String(255), nullable = False)
+    __tablename__='users' # good practice to specify table name
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), index=True, unique=True, nullable=False)
+    emailid = db.Column(db.String(100), index=True, nullable=False)
+	#password is never stored in the DB, an encrypted password is stored
+	# the storage should be at least 255 chars long
+    password_hash = db.Column(db.String(255), nullable=False)
 
-    comments = db.relationship('Comment', backref = 'user')
+    # relation to call user.comments and comment.created_by
+    comments = db.relationship('Comment', backref='user')
+
+
 
 class Destination(db.Model):
-    __tablename__ = 'destination'
-    id = db.Column(db.Integer, primary_key = True)
+    __tablename__ = 'destinations'
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
-    description = db.Column(db.String(512))
+    description = db.Column(db.String(200))
     image = db.Column(db.String(400))
     currency = db.Column(db.String(3))
+    # ... Create the Comments db.relationship
+	# relation to call destination.comments and comment.destination
+    comments = db.relationship('Comment', backref='destination')
 
-    comments = db.relationship('Comment',backref='destination')
+    
+	
+    def __repr__(self): #string print method
+        return "<Name: {}>".format(self.name)
 
 class Comment(db.Model):
-    __tablename__ = 'comment'
-    id = db.Column(db.Integer, primary_key = True)
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(400))
-    created_at = db.Column(db.DateTime, default = datetime.now())
-
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    #add the foreign keys
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'))
+    destination_id = db.Column(db.Integer, db.ForeignKey('destinations.id'))
 
 
+    def __repr__(self):
+        return "<Comment: {}>".format(self.text)
 
 
-
-
-
-# class Destination:
-    
-#     def __init__(self, name, description, image_fp, currency):
-#         self.name=name
-#         self.description=description
-#         self.image=image_fp
-#         self.currency=currency
-#         self.comments=list()
-    
-#     def set_comments(self,comment):
-#         self.comments.append(comment)
-
-#     def __repr__(self):
-#         str = 'Name {0}, Currency {1}'
-#         str.format(self.name, self.currency)
-#         return str
-
-# class Comment:
-#     def __init__(self,user,text,created_at):
-#         self.user=user
-#         self.text=user
-#         self.created_at = created_at
